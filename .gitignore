@@ -1,3 +1,7 @@
 #dirs
 
 /cache
+/results
+
+
+*/__pycache__
