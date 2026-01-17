@@ -1,11 +1,11 @@
 import os
 import pandas as pd
-from VLMEvalKit.vlmeval.dataset import build_dataset
-from VLMEvalKit.vlmeval.config import supported_VLM
-from VLMEvalKit.vlmeval.inference import infer_data_job
-from VLMEvalKit.vlmeval.smp import get_pred_file_path
+from vlmeval.dataset import build_dataset
+from vlmeval.config import supported_VLM
+from vlmeval.inference import infer_data_job
+from vlmeval.smp import get_pred_file_path
 
-from VLMEvalKit.vlmeval.vlm import BaseModel
+from vlmeval.vlm import BaseModel
 
 DATASETS = [
     "RefCOCO",
@@ -16,12 +16,12 @@ DATASETS = [
     "POPE",
 ]
 
-def evaluate_vlm(model, workdir, nproc=1):
+def evaluate_vlm(model, work_dir, nproc=1):
     """
     evaluate your vlm on refCOCO, refCOCO+, refCOCOg, GQA, DocVQA, ChartQA, CountBenchQA, and POPE.
     
-    :param model: your model, specified using VLMEvalKit.vlmeval.vlm.BaseModel class
-    :param workdir: directory to store the raw results in xlsx, and scores in json under workdir/model_name/.
+    :param model: your model, specified using vlmeval.vlm.BaseModel class
+    :param work_dir: directory to store the raw results in xlsx, and scores in json under work_dir/model_name/.
 
     note: the specific evals chosen are the same as those reported by moondream.ai for moondream3,
     which i am using as a reference to build VLMs.
@@ -50,7 +50,7 @@ def evaluate_vlm(model, workdir, nproc=1):
         
         infer_data_job(
             model=model,
-            work_dir=workdir,
+            work_dir=work_dir,
             model_name=model_name,
             dataset=dataset,
             verbose=True,
@@ -59,7 +59,7 @@ def evaluate_vlm(model, workdir, nproc=1):
         )
 
         pred_file = get_pred_file_path(
-            work_dir=workdir,
+            work_dir=work_dir,
             model_name=model_name,
             dataset_name=dataset_name,
         )
