@@ -1,0 +1,11 @@
+[project]
+name = "vlm-project"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13.11"
+dependencies = [
+    "pandas>=2.3.3",
+    "pytest>=9.0.2",
+    "torch>=2.9.1",
+]
