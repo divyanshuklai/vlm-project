@@ -1,4 +1,6 @@
 import os
+import sys
+
 import pandas as pd
 from vlmeval.dataset import build_dataset
 from vlmeval.config import supported_VLM
@@ -8,11 +10,11 @@ from vlmeval.smp import get_pred_file_path
 from vlmeval.vlm import BaseModel
 
 DATASETS = [
-    "RefCOCO",
-    "GQA_TestDev_Balanced",
-    "DocVQA_TEST",
-    "ChartQA_TEST",
-    "CountBenchQA",
+    # "RefCOCO",
+    # "GQA_TestDev_Balanced",
+    # "DocVQA_TEST",
+    # "ChartQA_TEST",
+    # "CountBenchQA",
     "POPE",
 ]
 
@@ -57,6 +59,7 @@ def evaluate_vlm(model, work_dir, nproc=1):
             ignore_failed=True,
             api_nproc=1,
         )
+        print(f"results generated for {model_name} on {dataset_name}, calculating scores...")
 
         pred_file = get_pred_file_path(
             work_dir=work_dir,
@@ -68,3 +71,6 @@ def evaluate_vlm(model, work_dir, nproc=1):
         results[dataset_name] = res
 
     return results
+
+if __name__ == "__main__":
+    evaluate_vlm("SmolVLM-256M", work_dir="results", nproc=2)

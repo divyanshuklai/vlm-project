@@ -6,7 +6,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 sys.path.append(project_root)
 
-def test_eval_on_smollm():
+def test_eval_on_smolvlm():
     from src.eval import evaluate_vlm
     from pprint import pprint
     model_name = "SmolVLM-256M"
@@ -15,7 +15,7 @@ def test_eval_on_smollm():
     pprint(results)
 
 def test_eval_on_random_output():
-    # from src.eval import evaluate_vlm
+    from src.eval import evaluate_vlm
     # from src.model import CustomVLM
     # model = CustomVLM()
     pass
