@@ -57,7 +57,7 @@ def evaluate_vlm(model, work_dir, nproc=1):
             dataset=dataset,
             verbose=True,
             ignore_failed=True,
-            api_nproc=1,
+            api_nproc=nproc,
         )
         print(f"results generated for {model_name} on {dataset_name}, calculating scores...")
 
