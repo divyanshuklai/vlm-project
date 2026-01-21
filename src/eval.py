@@ -1,13 +1,32 @@
 import os
 import sys
+import argparse
+
+import torch.distributed as dist
+import torch
 
 import pandas as pd
+
 from vlmeval.dataset import build_dataset
 from vlmeval.config import supported_VLM
 from vlmeval.inference import infer_data_job
 from vlmeval.smp import get_pred_file_path
 
 from vlmeval.vlm import BaseModel
+
+def setup_distributed():
+    if "WORLD_SIZE" in os.environ:
+        local_rank = int(os.environ.get("LOCAL_RANK", 0))
+        rank = int(os.environ.get("RANK", 0))
+        world_size = int(os.environ.get("WORLD_SIZE"), 1)
+
+        dist.init_process_group(backend="nccl")
+
+        if torch.cuda.is_available():
+            torch.cuda.set_device(local_rank)
+        
+        print(f"Initialized process {rank}/{world_size}, Local rank {local_rank}")
+
 
 DATASETS = [
     # "RefCOCO",
@@ -18,27 +37,29 @@ DATASETS = [
     "POPE",
 ]
 
-def evaluate_vlm(model, work_dir, nproc=1):
+def evaluate_vlm(model_ref : str, work_dir : str, nproc : int=1):
     """
     evaluate your vlm on refCOCO, refCOCO+, refCOCOg, GQA, DocVQA, ChartQA, CountBenchQA, and POPE.
     
-    :param model: your model, specified using vlmeval.vlm.BaseModel class
+    :param model: either the directory containing config.json and weights.pth or model name present in vlmeval.config.supportedVLM.
+    The model must be inherited from vlmeval.vlm.BaseModel and must have implemented generate_inner.
     :param work_dir: directory to store the raw results in xlsx, and scores in json under work_dir/model_name/.
 
     note: the specific evals chosen are the same as those reported by moondream.ai for moondream3,
     which i am using as a reference to build VLMs.
     """
 
-    model_name = "custom_model"
-    if isinstance(model, str):
-        model_name = model
-        if model_name in supported_VLM:
-            model : BaseModel = supported_VLM[model_name]()
-        else:
-            raise ValueError("The given model name is not supported by VLMEvalKit")
-        
-    elif hasattr(model, "model_name"):
-        model_name = model.model_name
+    model_name = "Custom Model"
+    if "/" in model_ref or "\\" in model_ref:
+        #model_ref is a path
+        raise NotImplemented("custom model evals not implemented")
+    elif model_ref in supported_VLM:
+        #model_ref is supported by VLMEvalKit
+        model_name = model_ref
+        model = supported_VLM[model_ref]() #lazy load model
+    else:
+        raise ValueError("model not supported.")
+    
     
     results = {}
 
@@ -73,4 +94,9 @@ def evaluate_vlm(model, work_dir, nproc=1):
     return results
 
 if __name__ == "__main__":
-    evaluate_vlm("SmolVLM-256M", work_dir="results", nproc=2)
+    setup_distributed()
+    evaluate_vlm("SmolVLM-256M", work_dir="results", nproc=1)
+
+    #cleanup
+    if dist.is_initialized():
+        dist.destroy_process_group()

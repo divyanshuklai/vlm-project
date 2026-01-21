@@ -2,6 +2,7 @@
 
 /cache
 /results
+/vlm-project-volume
 
 
 */__pycache__
