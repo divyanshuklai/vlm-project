@@ -50,7 +50,7 @@ def evaluate_vlm(model_ref : str, work_dir : str, nproc : int=1):
     """
 
     model_name = "Custom Model"
-    if "/" in model_ref or "\\" in model_ref:
+    if os.path.isdir(model_ref):
         #model_ref is a path
         raise NotImplemented("custom model evals not implemented")
     elif model_ref in supported_VLM:
@@ -60,6 +60,10 @@ def evaluate_vlm(model_ref : str, work_dir : str, nproc : int=1):
     else:
         raise ValueError("model not supported.")
     
+    #create a sub-dir to save model results
+    work_dir = os.path.join(work_dir, model_name)
+    if not os.path.exists(work_dir):
+        os.mkdir(work_dir)
     
     results = {}
 
@@ -80,6 +84,14 @@ def evaluate_vlm(model_ref : str, work_dir : str, nproc : int=1):
             ignore_failed=True,
             api_nproc=nproc,
         )
+
+        if dist.is_initialized():
+            dist.barrier() # wait for all devices to finish this dataset
+
+        if dist.is_initialized() and dist.get_rank() != 0:
+            #only rank 0 device generates results. avoid race conditions.
+            continue
+
         print(f"results generated for {model_name} on {dataset_name}, calculating scores...")
 
         pred_file = get_pred_file_path(
@@ -93,10 +105,28 @@ def evaluate_vlm(model_ref : str, work_dir : str, nproc : int=1):
 
     return results
 
-if __name__ == "__main__":
+def main():
+    parser = argparse.ArgumentParser(description="evaluate your VLM on refCOCO/+/g, GQA, DocVQA, ChartQA, CountBenchQA, and POPE.")
+    parser.add_argument("model", type=str, help="reference to the model path or model name supported by VLMEvalKit")
+    parser.add_argument("work_dir", type=str, help="directory where results will be saved.")
+    parser.add_argument("--nproc", type=int, help="processes per gpu to run. default 1", default=1)
+    
+
+    args = parser.parse_args()
+
+    #for multi-gpu
     setup_distributed()
-    evaluate_vlm("SmolVLM-256M", work_dir="../vlm-project-volume/results", nproc=1)
+
+    model_ref = args.model
+    work_dir = args.work_dir
+    nproc = args.nproc
+    evaluate_vlm(model_ref, work_dir, nproc)
 
     #cleanup
     if dist.is_initialized():
         dist.destroy_process_group()
+
+if __name__ == "__main__":
+    main()
+
+    
