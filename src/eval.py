@@ -95,7 +95,7 @@ def evaluate_vlm(model_ref : str, work_dir : str, nproc : int=1):
 
 if __name__ == "__main__":
     setup_distributed()
-    evaluate_vlm("SmolVLM-256M", work_dir="results", nproc=1)
+    evaluate_vlm("SmolVLM-256M", work_dir="../vlm-project-volume/results", nproc=1)
 
     #cleanup
     if dist.is_initialized():
