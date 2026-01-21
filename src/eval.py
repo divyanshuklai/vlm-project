@@ -18,7 +18,7 @@ def setup_distributed():
     if "WORLD_SIZE" in os.environ:
         local_rank = int(os.environ.get("LOCAL_RANK", 0))
         rank = int(os.environ.get("RANK", 0))
-        world_size = int(os.environ.get("WORLD_SIZE"), 1)
+        world_size = int(os.environ.get("WORLD_SIZE", 1))
 
         dist.init_process_group(backend="nccl")
 
