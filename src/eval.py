@@ -109,7 +109,7 @@ def main():
     parser = argparse.ArgumentParser(description="evaluate your VLM on refCOCO/+/g, GQA, DocVQA, ChartQA, CountBenchQA, and POPE.")
     parser.add_argument("model", type=str, help="reference to the model path or model name supported by VLMEvalKit")
     parser.add_argument("work_dir", type=str, help="directory where results will be saved.")
-    parser.add_argument("--nproc", type=int, help="processes per gpu to run. default 1", default=1)
+    parser.add_argument("-n","--nproc", type=int, help="processes per gpu to run. default 1", default=1)
     
 
     args = parser.parse_args()
